@@ -9,26 +9,23 @@ app.use(express.json());
 
 initializeDatabase();
 
-// Default route
 app.get("/", (req, res) => {
   res.send("Hello, Express!");
 });
 
-// Fetch all products with optional filters and sorting
 app.get("/products", async (req, res) => {
   try {
     const { category, subcategory, price, rating, sort } = req.query;
 
-    let query = {}; // Construct the query dynamically
+    let query = {};
 
     if (category) query.category = category;
     if (subcategory) query.subcategory = subcategory;
-    if (price) query.price = { $lte: parseFloat(price) }; // Less than or equal to price
-    if (rating) query.rating = { $gte: parseFloat(rating) }; // Greater than or equal to rating
+    if (price) query.price = { $lte: parseFloat(price) };
+    if (rating) query.rating = { $gte: parseFloat(rating) };
 
-    let productsQuery = Products.find(query); // Apply filters
+    let productsQuery = Products.find(query);
 
-    // Sorting (lowToHigh, highToLow)
     if (sort === "lowToHigh") {
       productsQuery = productsQuery.sort({ price: 1 });
     } else if (sort === "highToLow") {
@@ -43,7 +40,6 @@ app.get("/products", async (req, res) => {
   }
 });
 
-// Fetch a single product by ID
 app.get("/products/:productId", async (req, res) => {
   try {
     const product = await Products.findById(req.params.productId);
@@ -57,7 +53,6 @@ app.get("/products/:productId", async (req, res) => {
   }
 });
 
-// Add a new product
 app.post("/products", async (req, res) => {
   try {
     const { name, category, subcategory, price, rating, image } = req.body;
