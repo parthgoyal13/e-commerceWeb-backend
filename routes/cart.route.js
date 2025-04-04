@@ -32,15 +32,15 @@ router.post("/", async (req, res) => {
 });
 
 // Remove item from cart
-router.delete("/:id", async (req, res) => {
+router.delete("/cart/:id", async (req, res) => {
+  const { id } = req.params;
   try {
-    await Cart.findByIdAndDelete(req.params.id);
-    res.json({ message: "Item removed from cart" });
-  } catch (error) {
-    res.status(500).json({ error: "Error removing item" });
+    await CartModel.findByIdAndDelete(id);
+    res.status(200).json({ message: "Item removed" });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to remove item", error: err });
   }
 });
-
 router.patch("/:id", async (req, res) => {
   try {
     const { quantity } = req.body;
