@@ -12,10 +12,18 @@ router.get("/", async (req, res) => {
   }
 });
 
-// Add item to cart
+//  Add or update item in cart
 router.post("/", async (req, res) => {
   try {
     const { name, image, price, rating, quantity } = req.body;
+
+    const existingItem = await Cart.findOne({ name });
+
+    if (existingItem) {
+      existingItem.quantity += quantity || 1;
+      await existingItem.save();
+      return res.status(200).json(existingItem);
+    }
 
     const newItem = new Cart({
       name,
@@ -30,7 +38,6 @@ router.post("/", async (req, res) => {
     res.status(500).json({ error: "Error adding to cart" });
   }
 });
-
 // Remove item from cart
 router.delete("/:id", async (req, res) => {
   const { id } = req.params;
@@ -45,6 +52,7 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
+// Update quantity
 router.patch("/:id", async (req, res) => {
   try {
     const { quantity } = req.body;
