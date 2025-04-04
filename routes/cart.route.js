@@ -35,12 +35,16 @@ router.post("/", async (req, res) => {
 router.delete("/cart/:id", async (req, res) => {
   const { id } = req.params;
   try {
-    await CartModel.findByIdAndDelete(id);
-    res.status(200).json({ message: "Item removed" });
+    const deleted = await Cart.findByIdAndDelete(id);
+    if (!deleted) {
+      return res.status(404).json({ message: "Item not found" }); // 🔧 fix: return 404 for missing item
+    }
+    return res.status(200).json({ message: "Item removed" });
   } catch (err) {
     res.status(500).json({ message: "Failed to remove item", error: err });
   }
 });
+
 router.patch("/:id", async (req, res) => {
   try {
     const { quantity } = req.body;
