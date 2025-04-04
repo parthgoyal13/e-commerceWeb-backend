@@ -15,7 +15,15 @@ router.get("/", async (req, res) => {
 // Add item to cart
 router.post("/", async (req, res) => {
   try {
-    const newItem = new Cart(req.body);
+    const { name, image, price, rating, quantity } = req.body;
+
+    const newItem = new Cart({
+      name,
+      image,
+      price,
+      rating,
+      quantity: quantity || 1,
+    });
     await newItem.save();
     res.status(201).json(newItem);
   } catch (error) {
@@ -30,6 +38,20 @@ router.delete("/:id", async (req, res) => {
     res.json({ message: "Item removed from cart" });
   } catch (error) {
     res.status(500).json({ error: "Error removing item" });
+  }
+});
+
+router.patch("/:id", async (req, res) => {
+  try {
+    const { quantity } = req.body;
+    const updated = await Cart.findByIdAndUpdate(
+      req.params.id,
+      { quantity },
+      { new: true }
+    );
+    res.json(updated);
+  } catch (error) {
+    res.status(500).json({ error: "Error updating quantity" });
   }
 });
 
