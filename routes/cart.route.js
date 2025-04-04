@@ -32,12 +32,12 @@ router.post("/", async (req, res) => {
 });
 
 // Remove item from cart
-router.delete("/cart/:id", async (req, res) => {
+router.delete("/:id", async (req, res) => {
   const { id } = req.params;
   try {
     const deleted = await Cart.findByIdAndDelete(id);
     if (!deleted) {
-      return res.status(404).json({ message: "Item not found" }); // 🔧 fix: return 404 for missing item
+      return res.status(404).json({ message: "Item not found" });
     }
     return res.status(200).json({ message: "Item removed" });
   } catch (err) {
