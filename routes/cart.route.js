@@ -12,25 +12,35 @@ router.get("/", async (req, res) => {
   }
 });
 
-//  Add or update item in cart
+// Add or update item in cart - IMPROVED
 router.post("/", async (req, res) => {
   try {
-    const { name, image, price, rating, quantity } = req.body;
+    const { productId, name, image, price, rating, quantity = 1 } = req.body;
 
-    const existingItem = await Cart.findOne({ name });
+    // Validation
+    if (!productId || !name || !price) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+    if (quantity < 1) {
+      return res.status(400).json({ error: "Quantity must be at least 1" });
+    }
+
+    // Check for existing item by productId instead of name
+    const existingItem = await Cart.findOne({ productId });
 
     if (existingItem) {
-      existingItem.quantity += quantity || 1;
+      existingItem.quantity += quantity;
       await existingItem.save();
       return res.status(200).json(existingItem);
     }
 
     const newItem = new Cart({
+      productId, // Store reference to original product
       name,
       image,
       price,
       rating,
-      quantity: quantity || 1,
+      quantity,
     });
     await newItem.save();
     res.status(201).json(newItem);
@@ -38,6 +48,7 @@ router.post("/", async (req, res) => {
     res.status(500).json({ error: "Error adding to cart" });
   }
 });
+
 // Remove item from cart
 router.delete("/:id", async (req, res) => {
   const { id } = req.params;
@@ -52,15 +63,26 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
-// Update quantity
+// Update quantity - IMPROVED
 router.put("/:id", async (req, res) => {
   try {
     const { quantity } = req.body;
+
+    // Validation
+    if (!quantity || quantity < 1) {
+      return res.status(400).json({ error: "Invalid quantity" });
+    }
+
     const updated = await Cart.findByIdAndUpdate(
       req.params.id,
       { quantity },
       { new: true }
     );
+
+    if (!updated) {
+      return res.status(404).json({ error: "Cart item not found" });
+    }
+
     res.json(updated);
   } catch (error) {
     res.status(500).json({ error: "Error updating quantity" });
