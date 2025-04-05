@@ -12,12 +12,13 @@ router.get("/", async (req, res) => {
   }
 });
 
-//  Add or update item in cart
+// Add or update item in cart - CORRECTED
 router.post("/", async (req, res) => {
   try {
-    const { name, image, price, rating, quantity } = req.body;
+    const { productId, name, image, price, rating, quantity } = req.body; // CHANGED: Added productId
 
-    const existingItem = await Cart.findOne({ name });
+    // CHANGED: Now checking by productId instead of name
+    const existingItem = await Cart.findOne({ productId });
 
     if (existingItem) {
       existingItem.quantity += quantity || 1;
@@ -26,6 +27,7 @@ router.post("/", async (req, res) => {
     }
 
     const newItem = new Cart({
+      productId,
       name,
       image,
       price,
