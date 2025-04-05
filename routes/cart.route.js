@@ -53,7 +53,7 @@ router.delete("/:id", async (req, res) => {
 });
 
 // Update quantity
-router.patch("/:id", async (req, res) => {
+router.put("/:id", async (req, res) => {
   try {
     const { quantity } = req.body;
     const updated = await Cart.findByIdAndUpdate(
