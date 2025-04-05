@@ -12,26 +12,25 @@ router.get("/", async (req, res) => {
   }
 });
 
-// Add or update item in cart - CORRECTED
+//  Add or update item in cart
 router.post("/", async (req, res) => {
   try {
-    const { productId, name, image, price, rating, quantity = 1 } = req.body;
+    const { name, image, price, rating, quantity } = req.body;
 
-    const existingItem = await Cart.findOne({ productId });
+    const existingItem = await Cart.findOne({ name });
 
     if (existingItem) {
-      existingItem.quantity += quantity;
+      existingItem.quantity += quantity || 1;
       await existingItem.save();
       return res.status(200).json(existingItem);
     }
 
     const newItem = new Cart({
-      productId,
       name,
       image,
       price,
       rating,
-      quantity,
+      quantity: quantity || 1,
     });
     await newItem.save();
     res.status(201).json(newItem);
