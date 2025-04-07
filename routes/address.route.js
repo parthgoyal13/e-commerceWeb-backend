@@ -13,16 +13,16 @@ router.get("/", async (req, res) => {
 });
 
 // Get addresses by userId (NEW)
-router.get("/user/:userId", async (req, res) => {
-  try {
-    const addresses = await Address.find({ userId: req.params.userId });
-    res.json(addresses);
-  } catch (error) {
-    res
-      .status(500)
-      .json({ error: error.message || "Error fetching user addresses" });
-  }
-});
+// router.get("/user/:userId", async (req, res) => {
+//   try {
+//     const addresses = await Address.find({ userId: req.params.userId });
+//     res.json(addresses);
+//   } catch (error) {
+//     res
+//       .status(500)
+//       .json({ error: error.message || "Error fetching user addresses" });
+//   }
+// });
 
 // Add a new address
 router.post("/", async (req, res) => {
