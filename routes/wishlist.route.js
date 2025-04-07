@@ -24,12 +24,24 @@ router.post("/", async (req, res) => {
 });
 
 // Remove item from wishlist
-router.delete("/:id", async (req, res) => {
+// Remove product from wishlist (by productId)
+router.delete("/:productId", async (req, res) => {
   try {
-    await Wishlist.findByIdAndDelete(req.params.id);
-    res.json({ message: "Item removed from wishlist" });
+    const productIdToRemove = req.params.productId;
+
+    const updatedWishlist = await Wishlist.findOneAndUpdate(
+      {},
+      { $pull: { products: { productId: productIdToRemove } } },
+      { new: true }
+    );
+
+    if (!updatedWishlist) {
+      return res.status(404).json({ error: "Wishlist not found" });
+    }
+
+    res.json({ message: "Product removed from wishlist", updatedWishlist });
   } catch (error) {
-    res.status(500).json({ error: "Error removing item" });
+    res.status(500).json({ error: "Error removing product" });
   }
 });
 
