@@ -23,23 +23,20 @@ router.post("/", async (req, res) => {
   }
 });
 
-// Remove item from wishlist
-// Remove product from wishlist (by productId)
+// ✅ Correct way to delete a wishlist item when each product is a separate document
 router.delete("/:productId", async (req, res) => {
   try {
     const productIdToRemove = req.params.productId;
 
-    const updatedWishlist = await Wishlist.findOneAndUpdate(
-      {},
-      { $pull: { products: { productId: productIdToRemove } } },
-      { new: true }
-    );
+    const deletedItem = await Wishlist.findOneAndDelete({
+      "products.productId": productIdToRemove,
+    });
 
-    if (!updatedWishlist) {
-      return res.status(404).json({ error: "Wishlist not found" });
+    if (!deletedItem) {
+      return res.status(404).json({ error: "Product not found in wishlist" });
     }
 
-    res.json({ message: "Product removed from wishlist", updatedWishlist });
+    res.json({ message: "Product removed from wishlist", deletedItem });
   } catch (error) {
     res.status(500).json({ error: "Error removing product" });
   }
