@@ -6,6 +6,9 @@ const productRoutes = require("./routes/products.route");
 const wishlistRoutes = require("./routes/wishlist.route");
 const cartRoutes = require("./routes/cart.route");
 const addressRoutes = require("./routes/address.route");
+const orderRoutes = require("./routes/order.routes");
+const userAuthRoutes = require("./routes/userAuth.route");
+
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -19,6 +22,8 @@ app.use("/products", productRoutes);
 app.use("/wishlist", wishlistRoutes);
 app.use("/cart", cartRoutes);
 app.use("/address", addressRoutes);
+app.use("/orders", orderRoutes);
+app.use("/userAuth", userAuthRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
