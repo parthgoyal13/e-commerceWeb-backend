@@ -4,7 +4,7 @@ const Products = require("../models/products.model");
 
 router.get("/", async (req, res) => {
   try {
-    const { category, subcategory, price, rating, sort } = req.query;
+    const { category, subcategory, price, rating, sort, search } = req.query;
     let query = {};
 
     if (category) query.category = category;
@@ -12,7 +12,12 @@ router.get("/", async (req, res) => {
     if (price) query.price = { $lte: parseFloat(price) };
     if (rating) query.rating = { $gte: parseFloat(rating) };
 
+    if (search) {
+      query.name = { $regex: search, $options: "i" };
+    }
+
     let productsQuery = Products.find(query);
+
     if (sort === "lowToHigh") productsQuery = productsQuery.sort({ price: 1 });
     else if (sort === "highToLow")
       productsQuery = productsQuery.sort({ price: -1 });

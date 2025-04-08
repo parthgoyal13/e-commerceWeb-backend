@@ -3,7 +3,8 @@ const router = express.Router();
 const jwt = require("jsonwebtoken");
 const User = require("../models/user.model");
 
-const JWT_SECRET = "your_secret_key"; // ideally from .env
+const JWT_SECRET = "your_secret_key";
+
 const authMiddleware = (req, res, next) => {
   const token = req.headers.authorization?.split(" ")[1];
   if (!token) return res.status(401).json({ message: "No token provided" });
@@ -17,7 +18,6 @@ const authMiddleware = (req, res, next) => {
   }
 };
 
-// Get user profile
 router.get("/profile", authMiddleware, async (req, res) => {
   try {
     const user = await User.findById(req.userId).select("-password");

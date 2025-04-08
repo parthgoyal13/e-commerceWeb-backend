@@ -10,7 +10,7 @@ const orderRoutes = require("./routes/order.routes");
 const userAuthRoutes = require("./routes/userAuth.route");
 
 const app = express();
-// Allow frontend running on localhost:5173
+
 const allowedOrigins = [
   "http://localhost:5173",
   "https://e-commerce-web-frontend-dun.vercel.app",
