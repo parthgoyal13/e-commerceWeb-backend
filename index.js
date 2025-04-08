@@ -10,7 +10,13 @@ const orderRoutes = require("./routes/order.routes");
 const userAuthRoutes = require("./routes/userAuth.route");
 
 const app = express();
-app.use(cors());
+// Allow frontend running on localhost:5173
+const corsOptions = {
+  origin: "http://localhost:5173",
+  credentials: true,
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 
 initializeDatabase();
