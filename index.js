@@ -11,8 +11,19 @@ const userAuthRoutes = require("./routes/userAuth.route");
 
 const app = express();
 // Allow frontend running on localhost:5173
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://e-commerce-web-frontend-dun.vercel.app",
+];
+
 const corsOptions = {
-  origin: "http://localhost:5173",
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
   credentials: true,
 };
 
