@@ -28,7 +28,6 @@ router.get("/profile", authMiddleware, async (req, res) => {
   }
 });
 
-// Signup
 router.post("/signup", async (req, res) => {
   try {
     const { name, email, phone, password } = req.body;
@@ -48,7 +47,6 @@ router.post("/signup", async (req, res) => {
   }
 });
 
-// Login
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;

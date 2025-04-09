@@ -2,7 +2,6 @@ const express = require("express");
 const router = express.Router();
 const Address = require("../models/address.model");
 
-// Get all addresses
 router.get("/", async (req, res) => {
   try {
     const addresses = await Address.find();
@@ -12,7 +11,6 @@ router.get("/", async (req, res) => {
   }
 });
 
-// Get addresses by userId (NEW)
 router.get("/user/:userId", async (req, res) => {
   try {
     const addresses = await Address.find({ userId: req.params.userId });
@@ -24,7 +22,6 @@ router.get("/user/:userId", async (req, res) => {
   }
 });
 
-// Add a new address
 router.post("/", async (req, res) => {
   try {
     const newAddress = new Address(req.body);
@@ -35,7 +32,6 @@ router.post("/", async (req, res) => {
   }
 });
 
-// Update an address
 router.put("/:id", async (req, res) => {
   try {
     const updatedAddress = await Address.findByIdAndUpdate(
@@ -49,7 +45,6 @@ router.put("/:id", async (req, res) => {
   }
 });
 
-// Delete an address
 router.delete("/:id", async (req, res) => {
   try {
     await Address.findByIdAndDelete(req.params.id);

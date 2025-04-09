@@ -2,7 +2,6 @@ const express = require("express");
 const router = express.Router();
 const Wishlist = require("../models/wishlist.model");
 
-// Get all wishlist items
 router.get("/", async (req, res) => {
   try {
     const wishlist = await Wishlist.find();
@@ -12,7 +11,6 @@ router.get("/", async (req, res) => {
   }
 });
 
-// Add item to wishlist
 router.post("/", async (req, res) => {
   try {
     const newItem = new Wishlist(req.body);
@@ -23,7 +21,6 @@ router.post("/", async (req, res) => {
   }
 });
 
-// ✅ Correct way to delete a wishlist item when each product is a separate document
 router.delete("/:productId", async (req, res) => {
   try {
     const productIdToRemove = req.params.productId;

@@ -2,7 +2,6 @@ const express = require("express");
 const router = express.Router();
 const Cart = require("../models/cart.model");
 
-// Get all cart items
 router.get("/", async (req, res) => {
   try {
     const cart = await Cart.find();
@@ -12,7 +11,6 @@ router.get("/", async (req, res) => {
   }
 });
 
-//  Add or update item in cart
 router.post("/", async (req, res) => {
   try {
     const { name, image, price, rating, quantity } = req.body;
@@ -38,7 +36,7 @@ router.post("/", async (req, res) => {
     res.status(500).json({ error: "Error adding to cart" });
   }
 });
-// Remove item from cart
+
 router.delete("/:id", async (req, res) => {
   const { id } = req.params;
   try {
@@ -52,7 +50,6 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
-// Update quantity
 router.put("/:id", async (req, res) => {
   try {
     const { quantity } = req.body;
