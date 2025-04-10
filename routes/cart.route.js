@@ -37,16 +37,12 @@ router.post("/", async (req, res) => {
   }
 });
 
-router.delete("/:id", async (req, res) => {
-  const { id } = req.params;
+router.delete("/", async (req, res) => {
   try {
-    const deleted = await Cart.findByIdAndDelete(id);
-    if (!deleted) {
-      return res.status(404).json({ message: "Item not found" });
-    }
-    return res.status(200).json({ message: "Item removed" });
+    await Cart.deleteMany({});
+    res.status(200).json({ message: "All cart items removed" });
   } catch (err) {
-    res.status(500).json({ message: "Failed to remove item", error: err });
+    res.status(500).json({ message: "Failed to clear cart", error: err });
   }
 });
 
