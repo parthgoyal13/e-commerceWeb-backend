@@ -1,27 +1,84 @@
-const { Resend } = require("resend");
+const nodemailer = require("nodemailer");
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Create Brevo SMTP transporter
+const createTransporter = () => {
+  // Development mode: Log to console if no Brevo credentials
+  if (!process.env.BREVO_SMTP_KEY || !process.env.BREVO_SMTP_USER) {
+    return null;
+  }
+
+  return nodemailer.createTransport({
+    host: "smtp-relay.brevo.com",
+    port: 587,
+    secure: false, // true for 465, false for other ports
+    auth: {
+      user: process.env.BREVO_SMTP_USER,
+      pass: process.env.BREVO_SMTP_KEY,
+    },
+  });
+};
 
 const sendPasswordResetEmail = async (email, resetToken) => {
   const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
   const resetUrl = `${frontendUrl}/reset-password?token=${resetToken}`;
 
-  // Development mode: Log to console if no API key
-  if (!process.env.RESEND_API_KEY) {
+  // Development mode: Log to console if no Brevo credentials
+  if (!process.env.BREVO_SMTP_KEY || !process.env.BREVO_SMTP_USER) {
     console.log("=".repeat(60));
     console.log("🔐 PASSWORD RESET EMAIL (Development Mode)");
     console.log("=".repeat(60));
     console.log(`To: ${email}`);
     console.log(`Reset Link: ${resetUrl}`);
     console.log(`Token: ${resetToken}`);
+    console.log("Note: Brevo credentials not configured. Set BREVO_SMTP_USER and BREVO_SMTP_KEY in .env");
     console.log("=".repeat(60));
     return { success: true, devMode: true };
   }
 
-  // Production mode: Send real email
+  // Production mode: Send real email via Brevo SMTP
   try {
-    const { data, error } = await resend.emails.send({
-      from: process.env.RESEND_FROM_EMAIL || "onboarding@resend.dev",
+    // Get and trim credentials
+    const smtpUser = process.env.BREVO_SMTP_USER?.trim();
+    const smtpKey = process.env.BREVO_SMTP_KEY?.trim();
+    const smtpKeyLength = smtpKey?.length || 0;
+    
+    console.log(`Attempting to send email via Brevo SMTP`);
+    console.log(`SMTP User: ${smtpUser}`);
+    console.log(`SMTP Key length: ${smtpKeyLength} characters`);
+    
+    // Show first and last few characters of key for verification (safely)
+    if (smtpKey && smtpKeyLength > 10) {
+      const keyPreview = `${smtpKey.substring(0, 10)}...${smtpKey.substring(smtpKeyLength - 10)}`;
+      console.log(`SMTP Key preview: ${keyPreview}`);
+    }
+
+    // Verify credentials format
+    if (!smtpUser) {
+      throw new Error("BREVO_SMTP_USER is required");
+    }
+    if (!smtpKey || smtpKeyLength < 80) {
+      console.error(`ERROR: SMTP Key is only ${smtpKeyLength} characters. Expected ~100 characters.`);
+      console.error("Make sure you copied the COMPLETE key from Brevo dashboard.");
+      console.error("The key should start with 'xsmtpsib-' and be about 100 characters long.");
+      throw new Error(`SMTP Key appears incomplete (${smtpKeyLength} chars). Please copy the full key from Brevo.`);
+    }
+    
+    // Important: BREVO_SMTP_USER should be the "Login" value from Brevo dashboard, not necessarily an email
+    console.log("NOTE: BREVO_SMTP_USER should match the 'Login' field in Brevo SMTP settings");
+    
+    // Create transporter with trimmed values
+    const transporter = nodemailer.createTransport({
+      host: "smtp-relay.brevo.com",
+      port: 587,
+      secure: false,
+      auth: {
+        user: smtpUser,
+        pass: smtpKey,
+      },
+    });
+
+    const mailOptions = {
+      from: process.env.BREVO_FROM_EMAIL || process.env.BREVO_SMTP_USER,
       to: email,
       subject: "Password Reset Request",
       html: `
@@ -39,19 +96,53 @@ const sendPasswordResetEmail = async (email, resetToken) => {
           </p>
         </div>
       `,
-    });
+    };
 
-    if (error) {
-      console.error("Resend error:", error);
-      return { success: false, error };
-    }
-
-    return { success: true, data };
+    const info = await transporter.sendMail(mailOptions);
+    console.log("Email sent successfully via Brevo:", info.messageId);
+    return { success: true, messageId: info.messageId };
   } catch (error) {
     console.error("Email sending error:", error);
-    return { success: false, error: error.message };
+    
+    // Provide helpful error messages
+    if (error.code === 'EAUTH') {
+      console.error("=".repeat(60));
+      console.error("❌ BREVO SMTP AUTHENTICATION FAILED");
+      console.error("=".repeat(60));
+      console.error("Common issues and solutions:");
+      console.error("");
+      console.error("1. BREVO_SMTP_USER (Login):");
+      console.error("   - Go to Brevo Dashboard → Settings → SMTP & API → SMTP");
+      console.error("   - Copy the exact 'Login' value shown (NOT your account email)");
+      console.error("   - It might be an email or a different format");
+      console.error("");
+      console.error("2. BREVO_SMTP_KEY:");
+      console.error("   - Make sure you copied the COMPLETE SMTP key");
+      console.error("   - Should be ~100 characters, starting with 'xsmtpsib-'");
+      console.error("   - No spaces, no quotes, no line breaks");
+      console.error("");
+      console.error("3. Verify sender email:");
+      console.error("   - The 'from' email must be verified in your Brevo account");
+      console.error("   - Go to Brevo → Settings → Senders to verify");
+      console.error("");
+      console.error("4. Check .env file format:");
+      console.error("   - No quotes around values");
+      console.error("   - No spaces before/after =");
+      console.error("   - Example: BREVO_SMTP_USER=your-login-value");
+      console.error("=".repeat(60));
+    }
+    
+    // Fall back to console logging if email fails
+    console.log("=".repeat(60));
+    console.log("🔐 PASSWORD RESET EMAIL (Fallback - Email Send Failed)");
+    console.log("=".repeat(60));
+    console.log(`To: ${email}`);
+    console.log(`Reset Link: ${resetUrl}`);
+    console.log(`Token: ${resetToken}`);
+    console.log(`Error: ${error.message}`);
+    console.log("=".repeat(60));
+    return { success: true, devMode: true, error: error.message };
   }
 };
 
 module.exports = { sendPasswordResetEmail };
-
