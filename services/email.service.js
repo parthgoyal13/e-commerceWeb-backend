@@ -28,8 +28,8 @@ const sendPasswordResetEmail = async (email, resetToken) => {
     console.log("🔐 PASSWORD RESET EMAIL (Development Mode)");
     console.log("=".repeat(60));
     console.log(`To: ${email}`);
-    console.log(`Reset Link: ${resetUrl}`);
-    console.log(`Token: ${resetToken}`);
+    console.log(`Reset Token: ${resetToken}`);
+    console.log(`Reset URL: ${resetUrl}`);
     console.log("Note: Brevo credentials not configured. Set BREVO_SMTP_USER and BREVO_SMTP_KEY in .env");
     console.log("=".repeat(60));
     return { success: true, devMode: true };
@@ -84,15 +84,14 @@ const sendPasswordResetEmail = async (email, resetToken) => {
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
           <h2 style="color: #075985;">Password Reset Request</h2>
-          <p>You requested to reset your password. Click the button below to reset it:</p>
-          <a href="${resetUrl}" 
-             style="display: inline-block; padding: 12px 24px; background-color: #075985; color: white; text-decoration: none; border-radius: 4px; margin: 20px 0;">
-            Reset Password
-          </a>
-          <p>Or copy and paste this link in your browser:</p>
-          <p style="word-break: break-all; color: #666; background: #f5f5f5; padding: 10px; border-radius: 4px;">${resetUrl}</p>
+          <p>You requested to reset your password. Use the reset token below:</p>
+          <div style="background: #f5f5f5; padding: 15px; border-radius: 4px; margin: 20px 0; text-align: center;">
+            <p style="margin: 0; font-size: 14px; color: #666;">Your Reset Token:</p>
+            <p style="margin: 10px 0 0 0; font-family: monospace; font-size: 16px; color: #075985; word-break: break-all; font-weight: bold;">${resetToken}</p>
+          </div>
+          <p style="color: #666;">Go to your app and enter this token on the reset password page.</p>
           <p style="color: #999; font-size: 12px; margin-top: 30px;">
-            This link will expire in 1 hour. If you didn't request this, please ignore this email.
+            This token will expire in 1 hour. If you didn't request this, please ignore this email.
           </p>
         </div>
       `,
@@ -137,8 +136,8 @@ const sendPasswordResetEmail = async (email, resetToken) => {
     console.log("🔐 PASSWORD RESET EMAIL (Fallback - Email Send Failed)");
     console.log("=".repeat(60));
     console.log(`To: ${email}`);
-    console.log(`Reset Link: ${resetUrl}`);
-    console.log(`Token: ${resetToken}`);
+    console.log(`Reset Token: ${resetToken}`);
+    console.log(`Reset URL: ${resetUrl}`);
     console.log(`Error: ${error.message}`);
     console.log("=".repeat(60));
     return { success: true, devMode: true, error: error.message };
